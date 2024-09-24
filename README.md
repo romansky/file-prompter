@@ -91,7 +91,7 @@ If you want to contribute to File Prompter or run it locally for development:
 
 1. Clone the repository:
    ```
-   git clone https://github.com/yourusername/file-prompter.git
+   git clone https://github.com/romansky/file-prompter.git
    ```
 2. Navigate to the project directory:
    ```

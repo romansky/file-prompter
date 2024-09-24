@@ -10,6 +10,9 @@
     "Other"
   ],
   "main": "./dist/extension.js",
+  "repository": {
+    "url": "https://github.com/romansky/file-prompter.git"
+  },
   "contributes": {
     "languages": [
       {
