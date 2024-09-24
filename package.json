@@ -2,6 +2,7 @@
   "name": "file-prompter",
   "displayName": "File Prompter",
   "description": "Craft and curate reusable prompts that include files and folders from your project",
+  "publisher": "Roman Landenband",
   "version": "0.0.2",
   "engines": {
     "vscode": "^1.93.0"
