@@ -1,5 +1,5 @@
 <h1 align="center">
-    <img width="100" height="100" src="file-prompter.svg" alt="CoPa Logo"><br>
+    <img width="100" height="100" src="file-prompter.png" alt="File Prompter Logo"><br>
     File Prompter
 </h1>
 
