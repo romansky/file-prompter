@@ -1,0 +1,15 @@
+I'm writing a VS Code extension
+
+About this project:
+
+```markdown
+{{@file-prompter/README.md}}
+```
+
+ this is it's source code:
+
+---
+{{@file-prompter/src}}
+---
+
+// feature request text

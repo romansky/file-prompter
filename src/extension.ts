@@ -103,28 +103,48 @@ async function processPromptTemplate(template: string): Promise<string> {
     return result;
 }
 
+async function findProjectRoot(startPath: string): Promise<string | null> {
+    let currentPath = startPath;
+    while (currentPath !== path.dirname(currentPath)) {
+        const packageJsonPath = path.join(currentPath, 'package.json');
+        try {
+            await vscode.workspace.fs.stat(vscode.Uri.file(packageJsonPath));
+            return currentPath;
+        } catch {
+            currentPath = path.dirname(currentPath);
+        }
+    }
+    return null;
+}
+
 async function readFileOrFolder(filePath: string): Promise<string> {
     const workspaceFolder = vscode.workspace.workspaceFolders?.[0];
     if (!workspaceFolder) {
         return 'Error: No workspace folder found';
     }
 
-    const fullPath = path.join(workspaceFolder.uri.fsPath, filePath);
+    const projectRoot = await findProjectRoot(workspaceFolder.uri.fsPath);
+    if (!projectRoot) {
+        return 'Error: Unable to find project root (package.json)';
+    }
+
+    const fullPath = path.join(projectRoot, filePath);
+    const relativeToRoot = path.relative(projectRoot, fullPath);
 
     try {
         const stats = await vscode.workspace.fs.stat(vscode.Uri.file(fullPath));
         if (stats.type === vscode.FileType.Directory) {
-            return await readDirectoryRecursively(fullPath, '');
+            return await readDirectoryRecursively(fullPath, projectRoot, relativeToRoot);
         } else {
             const content = await vscode.workspace.fs.readFile(vscode.Uri.file(fullPath));
-            return formatFileContent(path.basename(fullPath), Buffer.from(content).toString('utf8'));
+            return formatFileContent(relativeToRoot, Buffer.from(content).toString('utf8'));
         }
     } catch (error) {
         return `Error reading ${filePath}: ${error}`;
     }
 }
 
-async function readDirectoryRecursively(dirPath: string, relativePath: string): Promise<string> {
+async function readDirectoryRecursively(dirPath: string, projectRoot: string, relativePath: string): Promise<string> {
     let result = '';
     const entries = await vscode.workspace.fs.readDirectory(vscode.Uri.file(dirPath));
 
@@ -134,7 +154,7 @@ async function readDirectoryRecursively(dirPath: string, relativePath: string): 
 
         if (type === vscode.FileType.Directory) {
             result += `===== ${relPath}/ =====\n`;
-            result += await readDirectoryRecursively(fullPath, relPath);
+            result += await readDirectoryRecursively(fullPath, projectRoot, relPath);
         } else {
             const content = await vscode.workspace.fs.readFile(vscode.Uri.file(fullPath));
             result += formatFileContent(relPath, Buffer.from(content).toString('utf8'));
@@ -144,8 +164,8 @@ async function readDirectoryRecursively(dirPath: string, relativePath: string): 
     return result;
 }
 
-function formatFileContent(filename: string, content: string): string {
-    return `===== ${filename} =====\n${content}\n\n`;
+function formatFileContent(relativePath: string, content: string): string {
+    return `===== ${relativePath} =====\n${content}\n\n`;
 }
 
 // This method is called when your extension is deactivated
